@@ -1,5 +1,3 @@
-//Alunos: Carlos H. A. Weege e Rafael Zink
-
 //Objetivo da atividade:
 //Criar uma aplicação para fazer a
 //tabela de espalhamento a partir de placas de automóvel, modelo MERCOSUL.
