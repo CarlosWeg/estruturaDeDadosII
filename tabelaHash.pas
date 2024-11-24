@@ -7,7 +7,7 @@ program tabelaEspelhamentoPlacas;
 
 	const
 	tamanhoTabela = 7;
-	ajustarAlfabeto = ord('A') + 1;
+	ajustarAlfabeto = ord('A');
 	ajustarNumerico = ord('0');
 	
 	type
@@ -32,7 +32,7 @@ program tabelaEspelhamentoPlacas;
 	begin
 	
 		caractere:=upcase(caractere);	
-		posicaoAlfabeto:=ord(caractere) - ajustarAlfabeto;
+		posicaoAlfabeto:=ord(caractere) - ajustarAlfabeto + 1;
 
 	end;
 	
@@ -73,13 +73,47 @@ program tabelaEspelhamentoPlacas;
 	
 	end;
 	
+	function placaExiste(placa: tipoPlaca): boolean;
+	var
+  indice: integer;
+  atual: pntElemento;
+  achou: boolean;
+	begin
+	
+	  indice := funcaoHash(placa);
+	  atual := tabela[indice];
+	  achou := false;
+	  
+	  while (atual <> nil) and (not achou) do
+	  begin
+	    if atual^.placa = placa then
+	      achou := true;
+	    atual := atual^.prox;
+	  end;
+	  
+	  placaExiste:=achou;
+	  
+	end;
+	
 	procedure adicionarPlaca(placa: tipoPlaca);
 	var
 	indice: integer;
 	novo: pntElemento;
 	atual: pntElemento;
+	escolha: char;
 	begin
 	
+		if placaExiste(placa) then
+	  begin
+	    writeln('Esta placa já está cadastrada!');
+			writeln('Deseja inserir mesmo assim?');
+			writeln('S / N');
+			readln(escolha);
+			upcase(escolha);
+			if escolha = 'N' then
+				exit;
+	  end;
+		
 		// Criação do novo elemento
 		indice:=funcaoHash(placa);
 		new(novo);
@@ -107,11 +141,69 @@ program tabelaEspelhamentoPlacas;
 		
 	end;
 	
+	procedure removerPlaca(placa: tipoPlaca);
+	var
+	indice: integer;
+	atual, ant, temp: pntElemento;
+	removido: boolean;
+	begin
+	
+	  //Calcula o índice onde a placa deveria estar na tabela
+	  indice := funcaoHash(placa);
+	  
+	  //Ponteiros para navegação
+	  atual := tabela[indice];
+	  ant := nil;
+	  removido := false;
+	  
+	  while atual <> nil do
+	  begin
+	    if atual^.placa = placa then
+	    begin
+	    
+	      // Remover o elemento atual
+	      
+	      if ant = nil then
+	      //Se ant é nil, significa que estamos removendo o primeiro elemento
+	      tabela[indice] := atual^.prox
+	      
+	      else
+	      // Caso contrário, pulamos o elemento atual
+	      ant^.prox := atual^.prox;
+	      
+	      //temp guarda o elemento a ser removido
+	      temp := atual;
+	      atual := atual^.prox;
+	      
+	      dispose(temp);
+	      
+	      removido := true;
+	      
+	    end
+	    
+	    else
+	    begin
+	      //Se não encontrou a placa, avança os ponteiros
+	      ant := atual;
+	      atual := atual^.prox;
+	    end;
+	    
+	  end;
+	  
+	  if removido then
+	  	writeln('Placa ', placa, ' removida(s) do índice ', indice, '.')
+	  	
+	  else
+	  	writeln('ERRO: Placa ', placa, ' não encontrada na tabela.');
+	  	
+	end;
+
+	
 	procedure removerPlacaIndice(indice: integer);
 	var
 	atual, ant: pntElemento;
 	begin
-	
+
 	  // Verifica se o índice é válido
 		if (indice<0) or (indice>tamanhoTabela-1) then
 			writeln('ERRO: Índice inválido!')
@@ -143,7 +235,7 @@ program tabelaEspelhamentoPlacas;
 			else
 				ant^.prox:=nil;
 			
-			writeln('Placa ', atual^.placa, ' removcida do índice ', indice);
+			writeln('Placa ', atual^.placa, ' removida do índice ', indice);
 			dispose(atual);
 			
 		end;
@@ -206,7 +298,8 @@ begin
 	    writeln('1. Adicionar placa');
 	    writeln('2. Exibir tabela');
 	    writeln('3. Remover placa por índice');
-	    writeln('4. Sair');
+	    writeln('4. Remover placa por número');
+	    writeln('5. Sair');
 	
 	    readln(op);
 	
@@ -230,11 +323,18 @@ begin
 	                readln(indice);
 	                removerPlacaIndice(indice);
 	            end;
-	        4: writeln('Saindo...');
+	        4:
+	            begin
+	                writeln('Digite a placa que gostaria de remover: ');
+	                readln(placa);
+	                removerPlaca(placa);
+	            end;
+								        	
+	        5: writeln('Saindo...');
 	        
 	        else writeln('Opção inválida');
 	    end;
 	
-	until op = 4;
+	until op = 5;
 	
 end.
