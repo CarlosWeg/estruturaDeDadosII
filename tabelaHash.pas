@@ -1,17 +1,19 @@
 //Objetivo da atividade:
 //Criar uma aplicação para fazer a
-//tabela de espalhamento a partir de placas de automóvel, modelo MERCOSUL.
+//tabela de espalhamento a partir de placas de automóvel.
+//Placas modelo MERCOSUL.
 
 program tabelaEspelhamentoPlacas;
 
 	const
-		tamanhoTabela = 7;
-		ajustarAlfabeto = ord('A') + 1;
-		ajustarNumerico = ord('0');
+	tamanhoTabela = 7;
+	ajustarAlfabeto = ord('A') + 1;
+	ajustarNumerico = ord('0');
 	
 	type
 	
 	pntElemento = ^tElemento;
+	
 	tElemento = record
 		placa: string;
 		ocupado: boolean;
@@ -21,10 +23,10 @@ program tabelaEspelhamentoPlacas;
 	tipoPlaca = string;
 	
 	var
-		tabela: array [0..tamanhoTabela -1] of pntElemento;
-		op: byte;
-		indice: integer;
-		placa: tipoPlaca;
+	tabela: array [0..tamanhoTabela -1] of pntElemento;
+	op: byte;
+	indice: integer;
+	placa: tipoPlaca;
 		
 	function posicaoAlfabeto(caractere: char):integer;
 	begin
@@ -41,6 +43,15 @@ program tabelaEspelhamentoPlacas;
 		
 	end;
 	
+	procedure inicializarTabela();
+	var
+	i: integer;
+	begin
+		
+		for i:=0 to tamanhoTabela-1 do
+			tabela[i]:=nil;
+		
+	end;
 	
 	function funcaoHash(placa: tipoPlaca):integer;
 	var
@@ -56,18 +67,10 @@ program tabelaEspelhamentoPlacas;
 				soma:=soma + posicaoNumero(placa[i]);
 		end;
 		
+		// Calcula o índice final usando o operador mod para garantir que o resultado
+		//esteja sempre dentro dos limites da tabela (entre 0 e tamanhoTabela-1).
 		funcaoHash:=soma mod tamanhoTabela;
 	
-	end;
-	
-	procedure inicializarTabela();
-	var
-	i: integer;
-	begin
-		
-		for i:=0 to tamanhoTabela-1 do
-			tabela[i]:=nil;
-		
 	end;
 	
 	procedure adicionarPlaca(placa: tipoPlaca);
@@ -110,35 +113,40 @@ program tabelaEspelhamentoPlacas;
 	begin
 	
 	  // Verifica se o índice é válido
-		if (indice<0) or (indice>=tamanhoTabela) then
+		if (indice<0) or (indice>tamanhoTabela-1) then
 			writeln('ERRO: Índice inválido!')
 			
 		// Verifica se o índice está vazio
 		else if tabela[indice] = nil then
-			writeln('ERRO: Nenhuma placa encontrada no índice ',indice);
-		
-		atual:=tabela[indice];
-		ant:=nil;
-		
-		// Percorre a lista até o último elemento
-		while atual^.prox <>nil do
-		begin
-			ant:=atual;
-			atual:=atual^.prox;
-		end;
-		
-		// Remove o último elemento
-		
-		if ant = nil then
-			// Caso seja o único elemento na lista
-			tabela[indice]:= nil
+			writeln('ERRO: Nenhuma placa encontrada no índice ',indice)
 		
 		else
-			// Caso haja mais de um elemento na lista	
-			ant^.prox:=nil;
+		begin
 		
-		writeln('Placa ', atual^.placa, ' removcida do índice ', indice);
-		dispose(atual);
+			atual:=tabela[indice];
+			ant:=nil;
+			
+			// Percorre a lista até o último elemento
+			while atual^.prox <>nil do
+			begin
+				ant:=atual;
+				atual:=atual^.prox;
+			end;
+			
+			// Após o while, 'atual' está no último elemento e 'ant' no penúltimo
+			
+			// Caso 1: Se ant é nil, significa que só tinha um elemento na lista
+			if ant = nil then
+				tabela[indice]:= nil
+				
+			// Caso 2: Se tinha mais elementos, o penúltimo agora aponta para nil
+			else
+				ant^.prox:=nil;
+			
+			writeln('Placa ', atual^.placa, ' removcida do índice ', indice);
+			dispose(atual);
+			
+		end;
 		
 	end;
 	
@@ -230,24 +238,3 @@ begin
 	until op = 4;
 	
 end.
-			
-						
-					 
-				
-
-	
-	
-					
-					
-		 
-		
-		
-		
-		
-		
-	
-	
-			
-		
-		
-	
